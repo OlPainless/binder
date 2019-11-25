@@ -23,7 +23,7 @@ func TestBenchmarks_Assert(t *testing.T) {
 		return nil
 	})
 
-	if err := bndr.DoString(`
+	if _, err := bndr.DoString(`
 		function fib_lua(n)
 			if n<3 then
 				return 1
@@ -87,7 +87,7 @@ func benchNative(bndr *Binder, b *testing.B) {
 			fib(%d)
 		end`
 
-	if err := bndr.DoString(fmt.Sprintf(s, b.N, testFibonacciIterations)); err != nil {
+	if _, err := bndr.DoString(fmt.Sprintf(s, b.N, testFibonacciIterations)); err != nil {
 		b.Error("Error Fibonacci go calculation", err)
 	}
 }
@@ -106,7 +106,7 @@ func benchLua(bndr *Binder, b *testing.B) {
 			fib(%d)
 		end`
 
-	if err := bndr.DoString(fmt.Sprintf(s, b.N, testFibonacciIterations)); err != nil {
+	if _, err := bndr.DoString(fmt.Sprintf(s, b.N, testFibonacciIterations)); err != nil {
 		b.Error("Error Fibonacci go calculation", err)
 	}
 }

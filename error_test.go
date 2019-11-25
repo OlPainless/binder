@@ -9,7 +9,7 @@ import (
 func TestErrorSourceSmall_Func(t *testing.T) {
 	b := getBinder()
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 local p = person.new('Steeve')
 print(p:email())
     `); err != nil {
@@ -33,7 +33,7 @@ print(p:email())
 func TestErrorSourceBig_Func(t *testing.T) {
 	b := getBinder()
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 
 
 

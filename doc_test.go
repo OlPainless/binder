@@ -26,11 +26,26 @@ func ExampleBinder_Func() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		log('This', 'is', 'Lua')
 	`); err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func ExampleBinder_DoString() {
+	b := New()
+
+	result, err := b.DoString(`
+		local a = "Hello"
+		local b = "World"
+		return a .. " " .. b
+	`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(result.Get(1).String())
 }
 
 func ExampleBinder_Module() {
@@ -53,7 +68,7 @@ func ExampleBinder_Module() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local r = require('reverse')
 		print(r.string('ABCDEFGHIJKLMNOPQRSTUFVWXYZ'))
 	`); err != nil {
@@ -94,7 +109,7 @@ func ExampleBinder_Table() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local p = person.new('Steeve')
 		print(p:name())
 

@@ -27,7 +27,7 @@ func main() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local r = require('reverse')
 
 		print(r.string('ABCDEFGHIJKLMNOPQRSTUFVWXYZ'))

@@ -1,21 +1,30 @@
 # Binder
 High level go to Lua binder. Write less, do more.
 
-**This is a fork of [github.com/alexeyco/binder](https://github.com/alexeyco/binder) which adds a** _Call_ **functionality and fixes crashes with newer** _gopher-lua_  **versions. Now the Binder must be closed explicitly **
+**This is a fork of [github.com/alexeyco/binder](https://github.com/alexeyco/binder) - it has some improvements, but also backwards-incompatible changes. If you need stability, please use the original library**
 
 Package binder allows to easily bind to Lua. Based on [gopher-lua](https://github.com/yuin/gopher-lua).
 
 *Write less, do more!*
 
+1. [Changes from original](#changes-from-original)
 1. [Killer-feature](#killer-feature)
 1. [Installation](#installation)
 1. [Examples](#examples)
     1. [Functions](#functions)
     1. [Modules](#modules)
     1. [Tables](#tables)
+    1. [Calling Lua functions from Go](#calling-lua-functions-from-go)
     1. [Options](#options)
     1. [Killer-featured errors](#killer-featured-errors)
 1. [License](#license)
+
+## Changes from original
+
+- Fixes crashes with newer versions of _gopher-lua_: Now binder must be explicitly closed after use
+- _Call_ functionality to call global Lua functions from Go
+- _DoString_ and _DoFile_ now return a _Results_ struct in addition to error, so that return values from evaluated scripts can be retrieved (and cleaned from the stack)
+
 
 ## Killer-feature
 
@@ -75,7 +84,7 @@ func main() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		log('This', 'is', 'Lua')
 	`); err != nil {
 		log.Fatalln(err)
@@ -114,7 +123,7 @@ func main() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local r = require('reverse')
 
 		print(r.string('ABCDEFGHIJKLMNOPQRSTUFVWXYZ'))
@@ -168,7 +177,7 @@ func main() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local p = person.new('Steeve')
 		print(p:name())
 

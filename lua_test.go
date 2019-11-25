@@ -63,7 +63,7 @@ func TestLua_Func(t *testing.T) {
 
 	b.Load(l)
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		assert(negate(true) == false, 'wrong negation')
 		assert(negate(false) == true, 'wrong negation')
 
@@ -78,7 +78,7 @@ func TestLua_Func(t *testing.T) {
 		t.Error("Error execute function", err)
 	}
 
-	if err := b.DoString("raiser()"); err == nil {
+	if _, err := b.DoString("raiser()"); err == nil {
 		t.Error("Must return error", err)
 	}
 }
@@ -108,7 +108,7 @@ func TestLua_Module(t *testing.T) {
 		return nil
 	})
 
-	if err := b.DoFile("lua_test.lua"); err != nil {
+	if _, err := b.DoFile("lua_test.lua"); err != nil {
 		t.Error("Error execute module", err)
 	}
 }
@@ -146,7 +146,7 @@ func TestLua_Table(t *testing.T) {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 		local p = person.new('Steeve')
 
 		assert(p:name() == 'Steeve', 'Steve is not Steve')
@@ -200,5 +200,25 @@ func TestLua_Caller(t *testing.T) {
 		t.Error("Expected 100 as second return value. Was", r2)
 	}
 
+	result.Close()
+}
+
+func TestLua_DoString(t *testing.T) {
+	b := New()
+
+	result, err := b.DoString(`
+		local a = "Hello"
+		local b = "World!"
+		return a .. " " .. b
+	`)
+	if err != nil {
+		t.Error("Error executing DoString", err)
+	}
+	if result.Values() != 1 {
+		t.Error("Expected 1 return value")
+	}
+	if r1 := result.Get(1).String(); r1 != "Hello World!" {
+		t.Error("Expected 'Hello World!' as first return value. Was", r1)
+	}
 	result.Close()
 }

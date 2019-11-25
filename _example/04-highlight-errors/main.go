@@ -41,7 +41,7 @@ func main() {
 		return nil
 	})
 
-	if err := b.DoString(`
+	if _, err := b.DoString(`
 local p = person.new('Steeve')
 print(p:name())
 

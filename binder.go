@@ -27,17 +27,21 @@ func (b *Binder) Load(loader *Loader) {
 }
 
 // DoString runs lua script string
-func (b *Binder) DoString(s string) error {
+func (b *Binder) DoString(s string) (Result, error) {
 	b.load()
-	return b.do(b.state.DoString(s), func(problem int) *source {
+	return b.do(func() error {
+		return b.state.DoString(s)
+	}, func(problem int) *source {
 		return newSource(s, problem)
 	})
 }
 
 // DoFile runs lua script file
-func (b *Binder) DoFile(f string) error {
+func (b *Binder) DoFile(f string) (Result, error) {
 	b.load()
-	return b.do(b.state.DoFile(f), func(problem int) *source {
+	return b.do(func() error {
+		return b.state.DoFile(f)
+	}, func(problem int) *source {
 		s, _ := ioutil.ReadFile(f)
 		return newSource(string(s), problem)
 	})
@@ -51,13 +55,18 @@ func (b *Binder) Call(fn string) Caller {
 	})
 }
 
-// do applies returns improved errors if it needed
-func (b *Binder) do(err error, h errSourceHandler) error {
-	if err != nil {
-		return newError(err, h)
+// do captures return values after execution, or returns improved errors if needed
+func (b *Binder) do(fn func() error, h errSourceHandler) (Result, error) {
+	base := b.state.GetTop()
+	if err := fn(); err != nil {
+		return Result{}, newError(err, h)
 	}
 
-	return nil
+	numReturns := b.state.GetTop() - base
+	return Result{
+		state:   b.state,
+		nValues: numReturns,
+	}, nil
 }
 
 // source returns lua source script
