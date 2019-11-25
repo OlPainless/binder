@@ -157,3 +157,48 @@ func TestLua_Table(t *testing.T) {
 		t.Error("Error execute module", err)
 	}
 }
+
+func TestLua_Caller(t *testing.T) {
+	b := New()
+
+	b.Func("test", func(c *Context) error {
+		if c.Top() != 2 {
+			return errors.New("expected two arguments")
+		}
+
+		a1 := c.Arg(1).String()
+		if a1 != "Hello" {
+			return errors.New("expected 'Hello' argument")
+		}
+
+		a2 := c.Arg(2).Number()
+		if a2 != 42 {
+			return errors.New("expected 42 argument")
+		}
+
+		c.Push().String(a1 + " World!")
+		c.Push().Number(100)
+		return nil
+	})
+
+	call := b.Call("test")
+	call.Args().String("Hello")
+	call.Args().Number(42)
+	result, err := call.Execute()
+
+	if err != nil {
+		t.Error("Error execute call", err)
+	}
+
+	if result.Values() != 2 {
+		t.Error("Expected 2 return values")
+	}
+	if r1 := result.Get(1).String(); r1 != "Hello World!" {
+		t.Error("Expected 'Hello World!' as first return value. Was", r1)
+	}
+	if r2 := result.Get(2).Number(); r2 != 100 {
+		t.Error("Expected 100 as second return value. Was", r2)
+	}
+
+	result.Close()
+}

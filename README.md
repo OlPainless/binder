@@ -1,11 +1,7 @@
 # Binder
 High level go to Lua binder. Write less, do more.
 
-[![Travis](https://img.shields.io/travis/alexeyco/binder.svg)](https://travis-ci.org/alexeyco/binder)
-[![Coverage Status](https://coveralls.io/repos/github/alexeyco/binder/badge.svg?branch=master)](https://coveralls.io/github/alexeyco/binder?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/alexeyco/binder)](https://goreportcard.com/report/github.com/alexeyco/binder)&nbsp;[![GoDoc](https://godoc.org/github.com/alexeyco/binder?status.svg)](https://godoc.org/github.com/alexeyco/binder)
-[![license](https://img.shields.io/github/license/alexeyco/binder.svg)](https://github.com/alexeyco/binder)
-[![binder](https://img.shields.io/badge/awesome-go-red.svg)](https://github.com/avelino/awesome-go#embeddable-scripting-languages)
+**This is a fork of [github.com/alexeyco/binder](https://github.com/alexeyco/binder) which adds a** _Call_ **functionality and fixes crashes with newer** _gopher-lua_  **versions. Now the Binder must be closed explicitly **
 
 Package binder allows to easily bind to Lua. Based on [gopher-lua](https://github.com/yuin/gopher-lua).
 
@@ -27,20 +23,20 @@ You can display detailed information about the error and get something like this
 
 ![Error](https://raw.githubusercontent.com/alexeyco/binder/master/Error.png)
 
-See [_example/04-highlight-errors](https://github.com/alexeyco/binder/tree/master/_example/04-highlight-errors). And [read more](#killer-featured-errors) about it.
+See [_example/04-highlight-errors](https://github.com/olpainless/binder/tree/master/_example/04-highlight-errors). And [read more](#killer-featured-errors) about it.
 
 ## Installation
 ```
-$ go get -u github.com/alexeyco/binder
+$ go get -u github.com/olpainless/binder
 ```
 To run unit tests:
 ```
-$ cd $GOPATH/src/github.com/alexeyco/binder
+$ cd $GOPATH/src/github.com/olpainless/binder
 $ go test -cover
 ```
 To see why you need to bind go to lua (need few minutes):
 ```
-$ cd $GOPATH/src/github.com/alexeyco/binder
+$ cd $GOPATH/src/github.com/olpainless/binder
 $ go test -bench=.
 ```
 
@@ -54,13 +50,14 @@ import (
 	"errors"
 	"log"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 func main() {
 	b := binder.New(binder.Options{
 		SkipOpenLibs: true,
 	})
+	defer b.Close()
 
 	b.Func("log", func(c *binder.Context) error {
 		t := c.Top()
@@ -94,7 +91,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 func main() {
@@ -135,7 +132,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 type Person struct {
@@ -183,6 +180,42 @@ func main() {
 }
 ```
 
+### Calling Lua functions from Go
+```go
+package main
+
+import (
+	"errors"
+	"log"
+
+	"github.com/olpainless/binder"
+)
+
+func main() {
+	b := binder.New()
+
+	b.Func("hello", func(c *binder.Context) error {
+		if c.Top() == 0 {
+			return errors.New("need arguments")
+		}
+		arg := c.Arg(1).String()
+
+		c.Push().String("Hello " + arg)
+		return nil
+	})
+
+	caller := b.Call("hello")
+	caller.Args().String("World")
+	result, err := caller.Execute()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(result.Get(1).String())
+	result.Close()
+}
+``` 
+
 ### Options
 ```go
 // Options binder options object
@@ -216,7 +249,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 type Person struct {

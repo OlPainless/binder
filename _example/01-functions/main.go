@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 func main() {

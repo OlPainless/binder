@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/alexeyco/binder"
+	"github.com/olpainless/binder"
 )
 
 type Person struct {

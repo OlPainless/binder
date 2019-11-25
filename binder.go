@@ -1,8 +1,9 @@
 package binder
 
 import (
-	"github.com/yuin/gopher-lua"
 	"io/ioutil"
+
+	"github.com/yuin/gopher-lua"
 )
 
 // Handler is binder function handler
@@ -13,6 +14,11 @@ type Binder struct {
 	*Loader
 	state   *lua.LState
 	loaders []*Loader
+}
+
+// Close closes the state and frees resources
+func (b *Binder) Close() {
+	b.state.Close()
 }
 
 // Load apply Loader
@@ -34,6 +40,14 @@ func (b *Binder) DoFile(f string) error {
 	return b.do(b.state.DoFile(f), func(problem int) *source {
 		s, _ := ioutil.ReadFile(f)
 		return newSource(string(s), problem)
+	})
+}
+
+// Call creates a call to a Lua global function
+func (b *Binder) Call(fn string) Caller {
+	b.load()
+	return newCaller(fn, &Context{
+		state: b.state,
 	})
 }
 
@@ -75,7 +89,6 @@ func New(opts ...Options) *Binder {
 	}
 
 	s := lua.NewState(options...)
-	defer s.Close()
 
 	if len(opts) > 0 && opts[0].SkipOpenLibs {
 		type lib struct {
